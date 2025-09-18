@@ -8,6 +8,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useAuth } from "@/contexts/AuthContext";
 import { colors, commonStyles } from "@/lib/utils";
 
 interface HeaderProps {
@@ -16,6 +18,7 @@ interface HeaderProps {
 
 export default function Header({ onNavigate }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, isAuthenticated, isLoading } = useAuth();
 
   const navItems = [
     { label: "Home", id: "home" },
@@ -23,6 +26,15 @@ export default function Header({ onNavigate }: HeaderProps) {
     { label: "Works", id: "works" },
     { label: "Testimonials", id: "testimonials" },
   ];
+
+  const handleAuthAction = () => {
+    if (isAuthenticated) {
+      router.push("/profile" as any);
+    } else {
+      router.push("/(auth)/signin");
+    }
+    setIsMenuOpen(false);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -54,14 +66,26 @@ export default function Header({ onNavigate }: HeaderProps) {
             ))}
           </View>
 
-          {/* CTA Button */}
-          <TouchableOpacity
-            style={styles.ctaButton}
-            onPress={() => onNavigate("features")}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.ctaText}>Getting Started</Text>
-          </TouchableOpacity>
+          {/* CTA Button / Auth Button */}
+          {!isLoading && (
+            <TouchableOpacity
+              style={[
+                styles.ctaButton,
+                isAuthenticated && styles.profileButton,
+              ]}
+              onPress={handleAuthAction}
+              activeOpacity={0.8}
+            >
+              {isAuthenticated ? (
+                <View style={styles.profileButtonContent}>
+                  <Ionicons name="person" size={16} color={colors.white} />
+                  <Text style={styles.ctaText}>{user?.username}</Text>
+                </View>
+              ) : (
+                <Text style={styles.ctaText}>Sign In</Text>
+              )}
+            </TouchableOpacity>
+          )}
 
           {/* Mobile Menu Button */}
           <TouchableOpacity
@@ -93,16 +117,27 @@ export default function Header({ onNavigate }: HeaderProps) {
                 <Text style={styles.mobileNavText}>{item.label}</Text>
               </TouchableOpacity>
             ))}
-            <TouchableOpacity
-              style={styles.mobileCTA}
-              onPress={() => {
-                onNavigate("features");
-                setIsMenuOpen(false);
-              }}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.mobileCTAText}>Getting Started</Text>
-            </TouchableOpacity>
+            {!isLoading && (
+              <TouchableOpacity
+                style={[
+                  styles.mobileCTA,
+                  isAuthenticated && styles.mobileProfileButton,
+                ]}
+                onPress={handleAuthAction}
+                activeOpacity={0.8}
+              >
+                {isAuthenticated ? (
+                  <View style={styles.mobileProfileContent}>
+                    <Ionicons name="person" size={18} color={colors.white} />
+                    <Text style={styles.mobileCTAText}>
+                      Profile ({user?.username})
+                    </Text>
+                  </View>
+                ) : (
+                  <Text style={styles.mobileCTAText}>Sign In</Text>
+                )}
+              </TouchableOpacity>
+            )}
           </View>
         )}
       </View>
@@ -172,6 +207,14 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     display: "none", // Hide on mobile
   },
+  profileButton: {
+    backgroundColor: colors.primary,
+  },
+  profileButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   ctaText: {
     color: colors.white,
     fontSize: 16,
@@ -210,6 +253,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     borderRadius: 25,
     marginTop: 12,
+  },
+  mobileProfileButton: {
+    backgroundColor: colors.primary,
+  },
+  mobileProfileContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
   },
   mobileCTAText: {
     color: colors.white,

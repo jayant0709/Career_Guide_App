@@ -24,14 +24,34 @@ export interface ForgotPasswordFormData {
   email: string;
 }
 
-interface AuthFormProps {
-  variant: "signup" | "signin" | "forgot-password";
-  onSubmit: (
-    data: SignUpFormData | SignInFormData | ForgotPasswordFormData
-  ) => void;
+interface SignUpAuthFormProps {
+  variant: "signup";
+  onSubmit: (data: SignUpFormData) => void;
+  isLoading?: boolean;
 }
 
-export default function AuthForm({ variant, onSubmit }: AuthFormProps) {
+interface SignInAuthFormProps {
+  variant: "signin";
+  onSubmit: (data: SignInFormData) => void;
+  isLoading?: boolean;
+}
+
+interface ForgotPasswordAuthFormProps {
+  variant: "forgot-password";
+  onSubmit: (data: ForgotPasswordFormData) => void;
+  isLoading?: boolean;
+}
+
+type AuthFormProps =
+  | SignUpAuthFormProps
+  | SignInAuthFormProps
+  | ForgotPasswordAuthFormProps;
+
+export default function AuthForm({
+  variant,
+  onSubmit,
+  isLoading: externalLoading,
+}: AuthFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -41,12 +61,19 @@ export default function AuthForm({ variant, onSubmit }: AuthFormProps) {
     formState: { errors },
   } = useForm();
 
+  const loading = externalLoading || isLoading;
+
   const handleFormSubmit = async (data: any) => {
-    setIsLoading(true);
-    // Simulate loading
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    onSubmit(data);
-    setIsLoading(false);
+    if (externalLoading) {
+      // If external loading is provided, don't manage internal loading
+      onSubmit(data);
+    } else {
+      setIsLoading(true);
+      // Simulate loading
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      onSubmit(data);
+      setIsLoading(false);
+    }
   };
 
   const renderSignUpForm = () => (
@@ -139,8 +166,8 @@ export default function AuthForm({ variant, onSubmit }: AuthFormProps) {
       <Button
         title="Sign Up"
         onPress={handleSubmit(handleFormSubmit)}
-        disabled={isLoading}
-        loading={isLoading}
+        disabled={loading}
+        loading={loading}
         style={styles.submitButton}
       />
 
@@ -213,8 +240,8 @@ export default function AuthForm({ variant, onSubmit }: AuthFormProps) {
       <Button
         title="Sign In"
         onPress={handleSubmit(handleFormSubmit)}
-        disabled={isLoading}
-        loading={isLoading}
+        disabled={loading}
+        loading={loading}
         style={styles.submitButton}
       />
 
@@ -262,8 +289,8 @@ export default function AuthForm({ variant, onSubmit }: AuthFormProps) {
       <Button
         title="Send Reset Link"
         onPress={handleSubmit(handleFormSubmit)}
-        disabled={isLoading}
-        loading={isLoading}
+        disabled={loading}
+        loading={loading}
         style={styles.submitButton}
       />
 

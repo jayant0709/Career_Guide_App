@@ -1,13 +1,47 @@
-import React from "react";
+import React, { useState } from "react";
+import { Alert } from "react-native";
+import { router } from "expo-router";
 import AuthCard from "@/components/auth/AuthCard";
 import AuthForm, { SignInFormData } from "@/components/auth/AuthForm";
-import { Alert } from "react-native";
+import { useAuth } from "@/contexts/AuthContext";
+import { validateSigninData } from "@/utils/validators";
 
 export default function SignInPage() {
-  const handleSignIn = (data: any) => {
-    console.log("Sign in data:", data);
-    // Here you would typically make an API call to authenticate the user
-    Alert.alert("Success", "User authentication successful!");
+  const { signin } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSignIn = async (data: SignInFormData) => {
+    // Client-side validation
+    const validation = validateSigninData({
+      identifier: data.usernameOrEmail,
+      password: data.password,
+    });
+
+    if (!validation.isValid) {
+      Alert.alert("Validation Error", validation.errors.join("\n"));
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const result = await signin(data.usernameOrEmail, data.password);
+
+      if (result.success) {
+        Alert.alert("Success", "Welcome back!", [
+          {
+            text: "OK",
+            onPress: () => router.replace("/"),
+          },
+        ]);
+      } else {
+        Alert.alert("Sign In Failed", result.error || "Invalid credentials");
+      }
+    } catch (error) {
+      Alert.alert("Error", "An unexpected error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -15,7 +49,11 @@ export default function SignInPage() {
       title="Welcome Back"
       subtitle="Continue your personalized career journey"
     >
-      <AuthForm variant="signin" onSubmit={handleSignIn} />
+      <AuthForm
+        variant="signin"
+        onSubmit={handleSignIn}
+        isLoading={isLoading}
+      />
     </AuthCard>
   );
 }
