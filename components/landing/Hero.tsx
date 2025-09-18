@@ -7,9 +7,16 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { colors, commonStyles } from "@/lib/utils";
 
 export default function Hero() {
+  const router = useRouter();
+
+  const handleStartJourney = () => {
+    router.push("/test" as any);
+  };
+
   return (
     <View style={styles.container}>
       {/* Background Elements */}
@@ -64,8 +71,9 @@ export default function Hero() {
               <TouchableOpacity
                 style={[styles.primaryButton, commonStyles.shadowLarge]}
                 activeOpacity={0.8}
+                onPress={handleStartJourney}
               >
-                <Text style={styles.primaryButtonText}>Start Your Journey</Text>
+                <Text style={styles.primaryButtonText}>Take Aptitude Test</Text>
                 <Ionicons
                   name="arrow-forward"
                   size={20}

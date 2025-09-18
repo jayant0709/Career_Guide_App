@@ -133,16 +133,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         password,
       });
 
-      if (response.data.ok && response.data.user && response.data.token) {
-        // Store token
-        await AsyncStorage.setItem(TOKEN_KEY, response.data.token);
+      if (response.data.ok && response.data.user) {
+        // Check if token is provided
+        if (response.data.token) {
+          // Store token
+          await AsyncStorage.setItem(TOKEN_KEY, response.data.token);
 
-        // Set token for future requests
-        apiClient.defaults.headers.common[
-          "Authorization"
-        ] = `Bearer ${response.data.token}`;
+          // Set token for future requests
+          apiClient.defaults.headers.common[
+            "Authorization"
+          ] = `Bearer ${response.data.token}`;
+        } else {
+          // Handle signup without immediate token (user needs to sign in)
+          console.log(
+            "Signup successful but no token provided. User will need to sign in."
+          );
+        }
 
-        // Set user
+        // Set user regardless of token presence
         setUser(response.data.user);
 
         return { success: true };

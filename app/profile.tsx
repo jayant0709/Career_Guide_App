@@ -12,11 +12,13 @@ import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTest } from "@/contexts/TestContext";
 import { Button } from "@/components/ui/Button";
 import { colors } from "@/lib/utils";
 
 export default function ProfilePage() {
   const { user, isLoading, isAuthenticated, logout } = useAuth();
+  const { isTestCompleted, checkTestStatus } = useTest();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
@@ -24,6 +26,20 @@ export default function ProfilePage() {
       router.replace("/(auth)/signin");
     }
   }, [isAuthenticated, isLoading]);
+
+  // Check test status when user is authenticated and component loads
+  useEffect(() => {
+    if (isAuthenticated && !isLoading) {
+      checkTestStatus().catch((error) => {
+        // Silently handle test status check errors to avoid disrupting user experience
+        console.log("Could not check test status:", error);
+      });
+    }
+  }, [isAuthenticated, isLoading]);
+
+  const handleTakeTest = () => {
+    router.push("/test" as any);
+  };
 
   const handleLogout = async () => {
     Alert.alert("Logout", "Are you sure you want to logout?", [
@@ -146,6 +162,59 @@ export default function ProfilePage() {
                     <Text style={styles.infoValue}>Recently joined</Text>
                   </View>
                 </View>
+              </View>
+            </View>
+
+            {/* Aptitude Test Section */}
+            <View style={styles.sectionCard}>
+              <Text style={styles.sectionTitle}>Career Assessment</Text>
+
+              <View style={styles.testContainer}>
+                <View style={styles.testInfo}>
+                  <Ionicons
+                    name={
+                      isTestCompleted()
+                        ? "checkmark-circle"
+                        : "analytics-outline"
+                    }
+                    size={24}
+                    color={isTestCompleted() ? "#4CAF50" : colors.primary}
+                  />
+                  <View style={styles.testContent}>
+                    <Text style={styles.testTitle}>
+                      {isTestCompleted()
+                        ? "Assessment Completed"
+                        : "Take Aptitude Test"}
+                    </Text>
+                    <Text style={styles.testDescription}>
+                      {isTestCompleted()
+                        ? "View your career recommendations and personality insights"
+                        : "Discover your ideal educational stream and career path"}
+                    </Text>
+                  </View>
+                </View>
+
+                <TouchableOpacity
+                  style={[
+                    styles.testButton,
+                    isTestCompleted() && styles.testButtonCompleted,
+                  ]}
+                  onPress={handleTakeTest}
+                >
+                  <Text
+                    style={[
+                      styles.testButtonText,
+                      isTestCompleted() && styles.testButtonTextCompleted,
+                    ]}
+                  >
+                    {isTestCompleted() ? "View Results" : "Start Test"}
+                  </Text>
+                  <Ionicons
+                    name="arrow-forward"
+                    size={16}
+                    color={isTestCompleted() ? "#4CAF50" : "#fff"}
+                  />
+                </TouchableOpacity>
               </View>
             </View>
 
@@ -368,5 +437,56 @@ const styles = StyleSheet.create({
     color: "#DC2626",
     fontSize: 16,
     fontWeight: "600",
+  },
+  // Test Section Styles
+  testContainer: {
+    gap: 16,
+  },
+  testInfo: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+  },
+  testContent: {
+    flex: 1,
+  },
+  testTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.textPrimary,
+    marginBottom: 4,
+  },
+  testDescription: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    lineHeight: 20,
+  },
+  testButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  testButtonCompleted: {
+    backgroundColor: "#E8F5E8",
+    borderWidth: 1,
+    borderColor: "#4CAF50",
+  },
+  testButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  testButtonTextCompleted: {
+    color: "#4CAF50",
   },
 });
