@@ -9,12 +9,14 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { colors, commonStyles } from "@/lib/utils";
+import { TestButton } from "../aptitude-test";
 
 export default function Hero() {
   const router = useRouter();
 
-  const handleStartJourney = () => {
-    router.push("/test" as any);
+  const handleTestComplete = (results: any) => {
+    // Optionally navigate to profile or show success message
+    console.log("Test completed from Hero:", results);
   };
 
   return (
@@ -68,19 +70,11 @@ export default function Hero() {
 
             {/* CTAs */}
             <View style={styles.ctaContainer}>
-              <TouchableOpacity
+              <TestButton
                 style={[styles.primaryButton, commonStyles.shadowLarge]}
-                activeOpacity={0.8}
-                onPress={handleStartJourney}
-              >
-                <Text style={styles.primaryButtonText}>Take Aptitude Test</Text>
-                <Ionicons
-                  name="arrow-forward"
-                  size={20}
-                  color={colors.textPrimary}
-                  style={styles.buttonIcon}
-                />
-              </TouchableOpacity>
+                textStyle={styles.primaryButtonText}
+                onComplete={handleTestComplete}
+              />
 
               <TouchableOpacity
                 style={styles.secondaryButton}

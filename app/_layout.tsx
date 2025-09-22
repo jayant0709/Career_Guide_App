@@ -5,7 +5,6 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { TestProvider } from "@/contexts/TestContext";
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -28,19 +27,17 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <AuthProvider>
-        <TestProvider>
-          <StatusBar style="dark" backgroundColor="#FCFBF8" />
-          <Stack
-            screenOptions={{
-              headerShown: false,
-            }}
-          >
-            <Stack.Screen name="index" />
-            <Stack.Screen name="profile" />
-            <Stack.Screen name="(auth)" options={{ presentation: "modal" }} />
-            <Stack.Screen name="test" options={{ presentation: "modal" }} />
-          </Stack>
-        </TestProvider>
+        <StatusBar style="dark" backgroundColor="#FCFBF8" />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+          }}
+        >
+          <Stack.Screen name="index" />
+          <Stack.Screen name="profile" />
+          <Stack.Screen name="(auth)" options={{ presentation: "modal" }} />
+          <Stack.Screen name="test" options={{ presentation: "modal" }} />
+        </Stack>
       </AuthProvider>
     </SafeAreaProvider>
   );

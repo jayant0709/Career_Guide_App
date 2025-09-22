@@ -4,7 +4,7 @@ import axios from 'axios';
 // For mobile development, use your computer's IP address instead of localhost
 // UPDATE THIS: Replace with your actual IP from ipconfig that matches 192.168.1.x
 const API_BASE_URL = __DEV__ 
-  ? 'http://192.168.1.5:3000' // REPLACE X with your actual IP number
+  ? 'http://192.168.1.6:3000' // REPLACE X with your actual IP number
   : 'https://your-production-url.com'; // Your production backend URL
 
 export const apiClient = axios.create({

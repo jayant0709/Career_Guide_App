@@ -12,14 +12,16 @@ import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/contexts/AuthContext";
-import { useTest } from "@/contexts/TestContext";
+import { TestButton } from "@/components/aptitude-test";
 import { Button } from "@/components/ui/Button";
 import { colors } from "@/lib/utils";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ProfilePage() {
   const { user, isLoading, isAuthenticated, logout } = useAuth();
-  const { isTestCompleted, checkTestStatus } = useTest();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [testCompleted, setTestCompleted] = useState(false);
+  const [testResults, setTestResults] = useState<any>(null);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -27,18 +29,63 @@ export default function ProfilePage() {
     }
   }, [isAuthenticated, isLoading]);
 
-  // Check test status when user is authenticated and component loads
+  // Check test completion when user is authenticated and component loads
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
-      checkTestStatus().catch((error) => {
-        // Silently handle test status check errors to avoid disrupting user experience
-        console.log("Could not check test status:", error);
-      });
+      checkTestCompletion();
     }
   }, [isAuthenticated, isLoading]);
 
-  const handleTakeTest = () => {
-    router.push("/test" as any);
+  const checkTestCompletion = async () => {
+    try {
+      const completed = await AsyncStorage.getItem("testCompleted");
+      const results = await AsyncStorage.getItem("aptitudeTestResults");
+
+      setTestCompleted(completed === "true");
+      if (results) {
+        setTestResults(JSON.parse(results));
+      }
+    } catch (error) {
+      console.log("Could not check test completion:", error);
+    }
+  };
+
+  const handleViewResults = () => {
+    if (testResults) {
+      Alert.alert(
+        `${
+          testResults.topStream.charAt(0).toUpperCase() +
+          testResults.topStream.slice(1)
+        } Stream`,
+        `You scored ${
+          testResults.score
+        }% match!\n\nTop recommendations:\n• ${testResults.recommendations.subjects
+          .slice(0, 2)
+          .join("\n• ")}\n\nCareers:\n• ${testResults.recommendations.careers
+          .slice(0, 2)
+          .join("\n• ")}`,
+        [
+          { text: "Retake Test", onPress: () => handleRetakeTest() },
+          { text: "OK", style: "default" },
+        ]
+      );
+    }
+  };
+
+  const handleRetakeTest = async () => {
+    try {
+      await AsyncStorage.removeItem("testCompleted");
+      await AsyncStorage.removeItem("aptitudeTestResults");
+      setTestCompleted(false);
+      setTestResults(null);
+    } catch (error) {
+      console.log("Could not reset test:", error);
+    }
+  };
+
+  const handleTestComplete = (results: any) => {
+    setTestCompleted(true);
+    setTestResults(results);
   };
 
   const handleLogout = async () => {
@@ -173,48 +220,47 @@ export default function ProfilePage() {
                 <View style={styles.testInfo}>
                   <Ionicons
                     name={
-                      isTestCompleted()
-                        ? "checkmark-circle"
-                        : "analytics-outline"
+                      testCompleted ? "checkmark-circle" : "analytics-outline"
                     }
                     size={24}
-                    color={isTestCompleted() ? "#4CAF50" : colors.primary}
+                    color={testCompleted ? "#4CAF50" : colors.primary}
                   />
                   <View style={styles.testContent}>
                     <Text style={styles.testTitle}>
-                      {isTestCompleted()
+                      {testCompleted
                         ? "Assessment Completed"
                         : "Take Aptitude Test"}
                     </Text>
                     <Text style={styles.testDescription}>
-                      {isTestCompleted()
+                      {testCompleted
                         ? "View your career recommendations and personality insights"
                         : "Discover your ideal educational stream and career path"}
                     </Text>
                   </View>
                 </View>
 
-                <TouchableOpacity
-                  style={[
-                    styles.testButton,
-                    isTestCompleted() && styles.testButtonCompleted,
-                  ]}
-                  onPress={handleTakeTest}
-                >
-                  <Text
-                    style={[
-                      styles.testButtonText,
-                      isTestCompleted() && styles.testButtonTextCompleted,
-                    ]}
+                {testCompleted ? (
+                  <TouchableOpacity
+                    style={[styles.testButton, styles.testButtonCompleted]}
+                    onPress={handleViewResults}
                   >
-                    {isTestCompleted() ? "View Results" : "Start Test"}
-                  </Text>
-                  <Ionicons
-                    name="arrow-forward"
-                    size={16}
-                    color={isTestCompleted() ? "#4CAF50" : "#fff"}
+                    <Text
+                      style={[
+                        styles.testButtonText,
+                        styles.testButtonTextCompleted,
+                      ]}
+                    >
+                      View Results
+                    </Text>
+                    <Ionicons name="arrow-forward" size={16} color="#4CAF50" />
+                  </TouchableOpacity>
+                ) : (
+                  <TestButton
+                    style={styles.testButton}
+                    textStyle={styles.testButtonText}
+                    onComplete={handleTestComplete}
                   />
-                </TouchableOpacity>
+                )}
               </View>
             </View>
 
