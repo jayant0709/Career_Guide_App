@@ -1,15 +1,16 @@
 {
   "expo": {
-    "name": "Career_Guide_App",
+    "name": "CareerSarthi",
     "slug": "Career_Guide_App",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "careerguideapp",
+    "icon": "./assets/images/app_logo.png",
+    "scheme": "careersarthi",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.jayant07.careersarthi"
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +20,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.jayant07.careersarthi"
     },
     "web": {
       "output": "static",
@@ -43,6 +45,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "3931ece9-e30b-46a4-aef7-0c5d83892529"
+      }
     }
   }
 }
