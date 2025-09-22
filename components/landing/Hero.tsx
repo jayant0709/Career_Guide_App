@@ -79,6 +79,7 @@ export default function Hero() {
               <TouchableOpacity
                 style={styles.secondaryButton}
                 activeOpacity={0.8}
+                onPress={() => router.push("/colleges" as any)}
               >
                 <Ionicons
                   name="book-outline"
