@@ -9,11 +9,11 @@ const API_BASE_URL = __DEV__
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 30000, // Increased to 30 seconds for Gemini API responses
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true, // Enable cookie handling for cross-origin requests
+  // Removed withCredentials to avoid CORS issues with mobile-to-web requests
 });
 
 // Request interceptor for adding auth token
